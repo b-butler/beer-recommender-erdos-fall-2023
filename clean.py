@@ -52,3 +52,39 @@ def remove_dup_beer_rows(data, dup_params=("beer_name", "brewery_name")):
     inexact_dup_ids = beers[beers.duplicated(dup_params, keep = False)]['beer_beerid']
     
     return data[~data.beer_beerid.isin(inexact_dup_ids)]
+
+def merge_similar_name_breweries(data):
+    """Clean the reviews data by merging similar named breweries to have one common name.
+    The list of breweries for which we do this is not expected to be exhaustive.
+    
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        The Beer Advocate data frame.
+    """
+    similar_names = [["BJ's Restaurant & Brewhouse",
+                      "BJ's Restaurant And Brewhouse",
+                      "BJ's Restaurant & Brewery"],
+                    ["Hops Grillhouse & Brewery",
+                     "Hops Grill & Brewery"],
+                    ["Rock Bottom Restaurant & Brewery",
+                     "Rock Bottom Restaurant and Brewery"],
+                    ["Les Trois Brasseurs",
+                     "Les 3 Brasseurs"]]
+    for similar_name in similar_names:
+            data.loc[reviews.brewery_name.isin(similar_name[1:]),'brewery_name'] = similar_name[0]
+    
+def merge_brewery_ids(data):
+    """ Assign a single brewery id to breweries that have the same name.
+    
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        The Beer Advocate data frame.
+    """
+    breweries = data[['brewery_name','brewery_id']].drop_duplicates()
+    duplicates = breweries.brewery_name.value_counts().loc[breweries.brewery_name.value_counts()>1]
+    # go through the reviews and update the brewery_id to be the largest id corresponding to a given name
+    for duplicate in duplicates.index:
+        data.loc[data.brewery_name==duplicate,'brewery_id'] = breweries.loc[breweries.brewery_name==duplicate,
+                                                                             'brewery_id'].max()
