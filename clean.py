@@ -13,6 +13,19 @@ def remove_null_rows(data, columns=("review_profilename", "review_overall")):
     return data.dropna(axis="index", subset=columns)
 
 
+def remove_duplicate_reviews(data, columns=("review_profilename", "beer_beerid")):
+    """Remove duplicate reviews defined by columns.
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        The Beer Advocate data frame.
+    columns: Sequence[str], optional
+        The columns to compare for duplicates.
+    """
+    return data.drop_duplicates(columns)
+
+
 # EXACT duplicate beers are beers that agree on beer_beerid, beer_name, beer_style, beer_abv, brewery_name, and brewery_id
 # INEXACT duplicate beers are beers that agree on beer_name and brewery_name (but differ on some other data).
 def get_beers(data):
@@ -86,5 +99,4 @@ def merge_brewery_ids(data):
     duplicates = breweries.brewery_name.value_counts().loc[breweries.brewery_name.value_counts()>1]
     # go through the reviews and update the brewery_id to be the largest id corresponding to a given name
     for duplicate in duplicates.index:
-        data.loc[data.brewery_name==duplicate,'brewery_id'] = breweries.loc[breweries.brewery_name==duplicate,
-                                                                             'brewery_id'].max()
+        data.loc[data.brewery_name==duplicate,'brewery_id'] = breweries.loc[breweries.brewery_name==duplicate, 'brewery_id'].max()
