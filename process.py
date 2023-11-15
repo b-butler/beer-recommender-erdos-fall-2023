@@ -40,7 +40,25 @@ class InteractionMatrixTransformer:
         interactions = self._data["review_" + review].values
         interactions = np.where(
             interactions >= threshold, 1, 0)
-        return sp.sparse.coo_matrix((interactions, self._indices), self._shape)
+        return sp.sparse.coo_matrix((interactions, self._indices), self._shape, copy=True)
+
+
+    def to_positive_negative(self, threshold=2.5, review="overall"):
+        """Transform to -1, 0, 1 matrix with given threshold.
+
+        Parameters
+        ----------
+        threshold: int, optional
+            The cut-off for review values to turn to one and
+            which to turn to -1. Defaults to 2.5.
+        review: string, optional
+            The review to use. Defaults to "overall".
+        """
+        interactions = self._data["review_" + review].values
+        interactions = np.where(
+            interactions >= threshold, 1, -1)
+        return sp.sparse.coo_matrix((interactions, self._indices), self._shape, copy=True)
+
 
     def to_range(self, review="overall"):
         """Transform to continuous matrix.

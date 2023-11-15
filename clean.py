@@ -13,6 +13,19 @@ def remove_null_rows(data, columns=("review_profilename", "review_overall")):
     return data.dropna(axis="index", subset=columns)
 
 
+def remove_duplicate_reviews(data, columns=("review_profilename", "beer_beerid")):
+    """Remove duplicate reviews defined by columns.
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        The Beer Advocate data frame.
+    columns: Sequence[str], optional
+        The columns to compare for duplicates.
+    """
+    return data.drop_duplicates(columns)
+
+
 # EXACT duplicate beers are beers that agree on beer_beerid, beer_name, beer_style, beer_abv, brewery_name, and brewery_id
 # INEXACT duplicate beers are beers that agree on beer_name and brewery_name (but differ on some other data).
 def get_beers(data):
