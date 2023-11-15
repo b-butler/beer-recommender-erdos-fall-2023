@@ -72,7 +72,8 @@ def merge_similar_name_breweries(data):
                     ["Les Trois Brasseurs",
                      "Les 3 Brasseurs"]]
     for similar_name in similar_names:
-            data.loc[reviews.brewery_name.isin(similar_name[1:]),'brewery_name'] = similar_name[0]
+            data.loc[data.brewery_name.isin(similar_name[1:]),'brewery_name'] = similar_name[0]
+    return data
     
 def merge_brewery_ids(data):
     """ Assign a single brewery id to breweries that have the same name.
@@ -88,3 +89,4 @@ def merge_brewery_ids(data):
     for duplicate in duplicates.index:
         data.loc[data.brewery_name==duplicate,'brewery_id'] = breweries.loc[breweries.brewery_name==duplicate,
                                                                              'brewery_id'].max()
+    return data
