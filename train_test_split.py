@@ -1,55 +1,62 @@
 """Methods to execute our validation scheme"""
-
-import pandas as pd
 import numpy as np
 
-
-
-def sample_1(group, random_state):
-    return group.sample(1, random_state = random_state)
-def sample_10_percent(group, random_state):
-    n = group.v_counts.iloc[0]
-    return group.sample(n//10, random_state = random_state)
-
-def get_splits(cleaned_df, random_state = 42):
-    """ Takes in a cleaned dataframe. Creates the reviewer_id and beer_id in the same manner as is done for the interaction matrix and adds these as columns.
+def get_splits(int_matrix, random_state=42):
+    """Returns the matrix coordinates for 5 train and test splits.
     
-    Returns 5 disjoint train and test sets.
+    Parameters
+    ----------
+    int_matrix: 2d matrix
+    random_state: int, optional
     """
     n_splits = 5
-    cleaned_df['reviewer_id'] = cleaned_df["review_profilename"].astype('category').cat.codes
-    cleaned_df['beer_id'] = cleaned_df["beer_beerid"].astype("category").cat.codes
+    np.random.seed(random_state)
+    # Convert the dense matrix to a CSR sparse matrix
+    int_matrix = int_matrix.tocsr()
 
-    cleaned_df['v_counts'] = cleaned_df.reviewer_id.map(cleaned_df.reviewer_id.value_counts())
-    
-    low_reviewers = cleaned_df.loc[cleaned_df.v_counts < 5]
-    mid_reviewers = cleaned_df.loc[(cleaned_df.v_counts >=5) & (cleaned_df.v_counts <= 10)]
-    high_reviewers = cleaned_df.loc[cleaned_df.v_counts > 10]
-    
-    test_sets = [np.empty((0,2), dtype=int)]*n_splits
-    for i in range(n_splits):
-        test_i = mid_reviewers.groupby('reviewer_id', group_keys=False).apply(sample_1,
-                                                                              random_state=random_state)
-        mid_reviewers = mid_reviewers.drop(test_i.index)
-        test_sets[i] = np.append(test_sets[i],test_i[['reviewer_id','beer_id']].values, axis=0)
+    # Accessing the CSR components
+    data = int_matrix.data
+    indices = int_matrix.indices
+    indptr = int_matrix.indptr
 
-        test_i = high_reviewers.groupby('reviewer_id', group_keys=False).apply(sample_10_percent,
-                                                                               random_state=random_state)
-        high_reviewers = high_reviewers.drop(test_i.index)
-        test_sets[i] = np.append(test_sets[i],test_i[['reviewer_id','beer_id']].values, axis=0)
-    
-    train = np.append(low_reviewers[['reviewer_id','beer_id']].values, 
-                      mid_reviewers[['reviewer_id','beer_id']].values,
-                      axis=0)
-    train = np.append(train,
-                      high_reviewers[['reviewer_id','beer_id']].values,
-                      axis=0)
-    
-    splits = [0]*5
-    for i in range(n_splits):
-        train_i = train.copy()
-        for j in range(n_splits):
+    users = [0]*int_matrix.shape[0]
+    test_sets = [[] for _ in range(n_splits)]
+    train_set = []
+    # for each user, separate their reviews into a train set and different test sets.
+    for i in range(len(users)):
+        row_start = indptr[i]
+        row_end = indptr[i + 1]
+        users[i] = indices[row_start:row_end] # these are the beers that user i reviewed
+        # place the users in buckets based on number of reviews
+        if len(users[i]) < 5:
+            for beer_idx in users[i]:
+                train_set.append([i,beer_idx])
+        elif len(users[i]) < 11:
+            users[i] = np.random.permutation(users[i])
+            for j in range(n_splits):
+                test_sets[j].append([i,users[i][j]])
+            for beer_idx in users[i][n_splits:]:
+                train_set.append([i,beer_idx])
+        else :
+            n = len(users[i])
+            k = n//10
+            users[i] = np.random.permutation(users[i])
+            for j in range(n_splits):
+                for beer_idx in users[i][j*k:(j+1)*k]:
+                    test_sets[j].append([i, beer_idx])
+            for beer_idx in users[i][n_splits*k:]:
+                train_set.append([i, beer_idx])
+    #train_set = np.array(train_set)
+    #test_sets = [np.array(test_sets[i]) for i in range(len(test_sets))]
+
+    splits = [0]*n_splits
+    for j in range(n_splits):
+        train_j = train_set.copy()
+        for i in range(n_splits):
             if i != j:
-                train_i = np.append(train_i, test_sets[j], axis=0)
-        splits[i] = (train_i, test_sets[i])
+                train_j.extend(test_sets[i])
+        for coords in train_j:
+            if len(coords) != 2:
+                print("UH OH",coords)
+        splits[j] = (np.array(train_j), np.array(test_sets[j]))
     return splits
