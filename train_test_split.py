@@ -21,7 +21,7 @@ def get_splits(int_matrix, random_state=42):
 
     users = [0]*int_matrix.shape[0]
     test_sets = [[] for _ in range(n_splits)]
-    train_set = []
+    train_set = [] # this set is never in the test set
     # for each user, separate their reviews into a train set and different test sets.
     for i in range(len(users)):
         row_start = indptr[i]
@@ -46,17 +46,12 @@ def get_splits(int_matrix, random_state=42):
                     test_sets[j].append([i, beer_idx])
             for beer_idx in users[i][n_splits*k:]:
                 train_set.append([i, beer_idx])
-    #train_set = np.array(train_set)
-    #test_sets = [np.array(test_sets[i]) for i in range(len(test_sets))]
-
+    # create the splits by appending all but one test set to the train set
     splits = [0]*n_splits
     for j in range(n_splits):
         train_j = train_set.copy()
         for i in range(n_splits):
             if i != j:
                 train_j.extend(test_sets[i])
-        for coords in train_j:
-            if len(coords) != 2:
-                print("UH OH",coords)
         splits[j] = (np.array(train_j), np.array(test_sets[j]))
     return splits
