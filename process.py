@@ -23,6 +23,15 @@ class InteractionMatrixTransformer:
         # Necessary to make ids contiguous from zero
         self._beer_ids = data["beer_beerid"].astype("category").cat.codes
 
+    def fit(self, method="positive_negative", threshold=2.5, review="overall"):
+        if method == "positive_negative":
+            return self.to_positive_negative(threshold, review)
+        if method == "zero_one":
+            return self.to_zero_one(threshold, review)
+        if method == "range":
+            return self.to_range(review)
+        raise ValueError(f"Unknown method ({method}).")
+
     @property
     def _indices(self):
         return (self._reviewer_ids, self._beer_ids)
@@ -40,7 +49,7 @@ class InteractionMatrixTransformer:
         interactions = self._data["review_" + review].values
         interactions = np.where(
             interactions >= threshold, 1, 0)
-        return sp.sparse.coo_matrix((interactions, self._indices), self._shape, copy=True)
+        return sp.sparse.csr_matrix((interactions, self._indices), self._shape, copy=True)
 
 
     def to_positive_negative(self, threshold=2.5, review="overall"):
@@ -57,7 +66,7 @@ class InteractionMatrixTransformer:
         interactions = self._data["review_" + review].values
         interactions = np.where(
             interactions >= threshold, 1, -1)
-        return sp.sparse.coo_matrix((interactions, self._indices), self._shape, copy=True)
+        return sp.sparse.csr_matrix((interactions, self._indices), self._shape, copy=True)
 
 
     def to_range(self, review="overall"):
@@ -69,4 +78,4 @@ class InteractionMatrixTransformer:
             The review to use. Defaults to "overall".
         """
         interactions = self._data["review_" + review].values
-        return sp.sparse.coo_matrix((interactions, self._indices), self._shape)
+        return sp.sparse.csr_matrix((interactions, self._indices), self._shape)
