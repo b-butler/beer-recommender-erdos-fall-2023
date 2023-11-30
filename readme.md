@@ -15,8 +15,12 @@ The -1, 0, 1 matrix represents bad reviews as a -1 making them worse than not tr
 ## Hyperparameter Optimization
 We performed hyperparameter grid searches on parameters for creating the interaction matrix and the models themselves.
 For the LightFM models we varied the number of latent dimensions, the loss function used, k for the Warp-KOS loss, whether a -1, 0, 1 matrix or 0, 1 matrix was used, the threshold to convert a review to a 1 rather than -1 or 0.
+For the PyTorch models, we varied only the number latent dimensions.
 
 ## Notebook toc
 
 - light-fm-models.ipynb: Performs a hyperparameter grid search over LightFM models.
 - train-final-model.ipynb: Trains, evaluations, and saves the final model with optimal hyperparameters.
+- DataCleaning.ipynb: Performs some preliminary EDA in particular on the set of beers.
+- pyTorchModels.ipynb: Contains functions and code for building, training, and evaluating the standard matrix factorization model in PyTorch.
+
