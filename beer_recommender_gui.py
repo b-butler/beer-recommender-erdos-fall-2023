@@ -151,7 +151,7 @@ root = tk.Tk()
 root.title("Beer Recommender")
 
 root.geometry("800x600")
-instructions = "1. Find the brewery of the beer you have in mind by typing in all or part of the brewery's name in the first box and then select the desired brewery from the dropdown menu. \n2. Type in all of part of the beer name you have in mind and select the desired beer using the dropdown menu for the second box. \n3. Click 'Add Beer'. \n4. Repeat steps 1 and 2 as many times as desired -- we recommend adding at least 5 beers that you like. \n5. Click 'Get Beer Recommendations' to get your personalized beer recommendations!"
+instructions = "1. Find the brewery of the beer you have in mind by typing in all or part of the brewery's name in the first box and then select the desired brewery from the dropdown menu. \n2. Type in all of part of the beer name you have in mind and select the desired beer using the dropdown menu for the second box. \n3. Repeat steps 1 and 2 as many times as desired -- we recommend adding at least 5 beers that you like. \n4. Click 'Get Beer Recommendations' to get your personalized beer recommendations!"
 header_label = tk.Label(
     root, text="Beer Recommendation instructions:", justify="center"
 )
