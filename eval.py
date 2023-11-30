@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # Code taken and modified from LightFM's repository (https://github.com/lyst/lightfm)
 def recall_at_k(
     model,
