@@ -17,8 +17,12 @@ We performed hyperparameter grid searches on parameters for creating the interac
 For the LightFM models we varied the number of latent dimensions, the loss function used, k for the Warp-KOS loss, whether a -1, 0, 1 matrix or 0, 1 matrix was used, the threshold to convert a review to a 1 rather than -1 or 0.
 For the PyTorch models, we varied only the number latent dimensions.
 
+## Beer Recommender GUI
+We built a gui (stored in beer-recommender-gui.py) that allows the user to input beers that they like and to get their own personalized recommendations. This works by resizing and rerunning the pre-trained final model with an extra row to accommodate the new user. The gui appears to be functional on Linux systems but not Windows or Apple.
+
 ## Notebook toc
 
+- Baseline Models.ipynb: Runs the 2 baseline models both on the modified validation scheme and on the full data set.
 - light-fm-models.ipynb: Performs a hyperparameter grid search over LightFM models.
 - train-final-model.ipynb: Trains, evaluations, and saves the final model with optimal hyperparameters.
 - DataCleaning.ipynb: Performs some preliminary EDA in particular on the set of beers.
